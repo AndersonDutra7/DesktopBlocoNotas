@@ -68,10 +68,10 @@ class MainWindow(QMainWindow):
         db = DataBase()
 
         nota = Bloco_De_Notas(
-            id = self.txt_id.isReadOnly(),
-            nome_nota = self.txt_nome_nota.isReadOnly(),
+            id = self.txt_id.text(),
+            nome_nota = self.txt_nome_nota.toPlainText(),
             data_nota = self.txt_data_nota.isReadOnly(),
-            texto_nota = self.txt_texto_nota.isReadOnly()
+            texto_nota = self.txt_texto_nota.toPlainText()
         )
 
         if self.btn_salvar.text() == 'Salvar':
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
                 msg.setWindowTitle('Erro ao Criar Nota!')
-                msg.setText(f'O ID {self.txt_id.text()} já existe com o nome {self.txt_nome_nota.text()}')
+                msg.setText(f'O ID {self.txt_id.text()} já existe com o nome {self.txt_nome_nota}')
                 msg.exec()
             else:
                 msg = QMessageBox()
@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
             if retorno == 'Ok':
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
-                    # msg.setWindowTitle('Erro ao Editar a Nota')
+                msg.setWindowTitle('Edição de Nota')
                 msg.setText('Nota Atualizada')
                 msg.exec()
                     # self.limpar_campos()

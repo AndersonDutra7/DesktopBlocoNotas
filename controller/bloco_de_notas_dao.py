@@ -4,7 +4,7 @@ from model.bloco_de_notas import Bloco_De_Notas
 
 
 class DataBase:
-    def __init__(self, nome='system.db'):
+    def __init__(self, nome='system.db2'):
         self.connection = None
         self.name = nome
 
@@ -51,8 +51,21 @@ class DataBase:
     def ler_nota(self):
         pass
 
-    def editar_nota(self):
-        pass
+    def editar_nota(self, nota = Bloco_De_Notas):
+        self.connect()
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(f""" UPDATE BANCO_DE_NOTAS SET
+                 ID = '{nota.id}',
+                 NOME_NOTA = '{nota.nome_nota}',
+                 DATA_NOTA = '{nota.data_nota}'
+                 TEXTO_NOTA = '{nota.texto_nota}'""")
+            self.connection.commit()
+            return 'Ok'
+        except sqlite3.Error as e:
+            return str(e)
+        finally:
+            self.close_connection()
 
     def excluir_nota(self):
         pass
