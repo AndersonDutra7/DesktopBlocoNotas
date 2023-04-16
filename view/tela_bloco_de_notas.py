@@ -1,8 +1,10 @@
 import requests
 import json
 import sys
+from datetime import datetime
 
 from PySide6 import QtWidgets
+from PySide6.QtCore import QSize
 from PySide6.QtWidgets import (QMainWindow, QVBoxLayout, QComboBox, QLabel, QLineEdit, QWidget, QPushButton,
                                QMessageBox, QSizePolicy, QTableWidget, QAbstractItemView, QTableWidgetItem, QTextEdit)
 
@@ -13,41 +15,41 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setMinimumSize(400, 300)
+        self.setMinimumSize(450, 450)
 
         self.setWindowTitle('BLOCO DE NOTAS')
 
         self.lbl_id = QLabel('ID')
-        self.txt_id = QLineEdit('1')
-        self.lbl_nome_nota = QLabel('TITULO')
-        self.txt_nome_nota = QTextEdit()
-        self.lbl_data_nota = QLabel('NOTA')
-        self.txt_data_nota = QTextEdit()
-        self.lbl_texto_nota = QLabel('NOTAS CADASTRADAS')
-        self.txt_texto_nota = QTextEdit()
+        self.txt_id = QLineEdit()
+        self.txt_id.setMaximumSize(QSize(100, 100))
+        self.lbl_nome_nota = QLabel('TITULO DA NOTA')
+        self.txt_nome_nota = QLineEdit()
+        self.lbl_nota = QLabel('NOTA')
+        self.txt_nota = QTextEdit()
+        self.lbl_notas_cadastradas = QLabel('NOTAS CADASTRADAS')
         self.btn_salvar = QPushButton('Salvar')
+        self.btn_salvar.setMaximumSize(QSize(100, 100))
         self.btn_remover = QPushButton('Remover')
-        # self.tabela_clientes = QTableWidget()
-
-        # self.tabela_clientes.setColumnCount(12)
-        # self.tabela_clientes.setHorizontalHeaderLabels(['CPF', 'Nome', 'Telefone Fixo', 'Telefone Celular', 'Sexo'
-        #                                                 , 'Cep', 'Logradouro', 'Número', 'Complemento', 'Bairro',
-        #                                                 'Município', 'Estado'])
-        # self.tabela_clientes.setSelectionMode(QAbstractItemView.NoSelection)
-        # self.tabela_clientes.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
+        self.btn_remover.setMaximumSize(QSize(100, 100))
+        self.tabela_notas_cadastradas = QTableWidget()
+        self.tabela_notas_cadastradas.setColumnCount(4)
+        self.tabela_notas_cadastradas.setHorizontalHeaderLabels(['ID ', 'NOME_NOTA', 'DATA_NOTA', 'TEXTO_NOTA'])
+        self.tabela_notas_cadastradas.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tabela_notas_cadastradas.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.txt_data_nota = QLabel()
 
         layout = QVBoxLayout()
         layout.addWidget(self.lbl_id)
         layout.addWidget(self.txt_id)
         layout.addWidget(self.lbl_nome_nota)
         layout.addWidget(self.txt_nome_nota)
-        layout.addWidget(self.lbl_data_nota)
-        layout.addWidget(self.txt_data_nota)
-        layout.addWidget(self.lbl_texto_nota)
-        layout.addWidget(self.txt_texto_nota)
+        layout.addWidget(self.lbl_nota)
+        layout.addWidget(self.txt_nota)
+        layout.addWidget(self.lbl_notas_cadastradas)
+        layout.addWidget(self.tabela_notas_cadastradas)
         layout.addWidget(self.btn_salvar)
         layout.addWidget(self.btn_remover)
+        self.btn_remover.setVisible(False)
 
         self.container = QWidget()
         self.container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -55,23 +57,22 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.container)
         self.container.setLayout(layout)
 
-        # self.btn_remover.setVisible(False)
         self.btn_salvar.clicked.connect(self.salvar_nota)
-        # self.txt_cpf.editingFinished.connect(self.consultar_cliente)
+        self.txt_id.editingFinished.connect(self.consultar_nota())
         # self.txt_cep.editingFinished.connect(self.consultar_enderecos)
-        # self.btn_remover.clicked.connect(self.remover_cliente)
+        # self.btn_remover.clicked.connect(self.remover_nota())
         # self.btn_limpar.clicked.connect(self.limpar_campos)
-        # self.tabela_clientes.cellDoubleClicked.connect(self.carrega_dados)
-        # self.popula_tabela_clientes()
+        self.tabela_notas_cadastradas.cellDoubleClicked.connect(self.carregar_dados)
+        self.popular_tabela_notas_cadastradas()
 
     def salvar_nota(self):
         db = DataBase()
 
         nota = Bloco_De_Notas(
             id = self.txt_id.text(),
-            nome_nota = self.txt_nome_nota.toPlainText(),
-            data_nota = self.txt_data_nota.isReadOnly(),
-            texto_nota = self.txt_texto_nota.toPlainText()
+            nome_nota = self.txt_nome_nota.text(),
+            texto_nota = self.txt_nota.toPlainText(),
+            data_nota = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
 
         if self.btn_salvar.text() == 'Salvar':
@@ -110,5 +111,79 @@ class MainWindow(QMainWindow):
                 msg.setWindowTitle('Erro ao Atualizar Nota! ')
                 msg.setText('Erro ao Atualziar Nota, Verifique os Dados Inseridos')
                 msg.exec()
-        # self.popula_tabela_clientes()
+        self.popular_tabela_notas_cadastradas()
             # self.txt_cpf.setReadOnly(False)
+
+    def consultar_nota(self):
+        if self.txt_id.text() != '':
+            db = DataBase()
+            retorno = db.consulta_todas_notas(str(self.txt_id.text()))
+
+            if retorno is not None:
+                self.btn_salvar.setText('Atualizar')
+                msg = QMessageBox()
+                msg.setWindowTitle('Cliente já cadastrado')
+                msg.setText(f'O CPF {self.txt_id.text()} já esta cadastrado')
+                msg.exec()
+                self.txt_nome_nota.setText(retorno[1])
+                self.txt_nota.setText(retorno[2])
+                self.txt_data_nota.setText(retorno[3])
+                self.btn_remover.setVisible(True)
+
+    def remover_nota(self):
+        msg = QMessageBox()
+        msg.setWindowTitle('Remover Nota')
+        msg.setText('Esta Nota Será Removida!')
+        msg.setInformativeText(f'Voce deseja remover a nota de Nome {self.txt_id.text()} ?')
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg.button(QMessageBox.Yes).setText('Sim')
+        msg.button(QMessageBox.No).setText('Não')
+
+        resposta = msg.exec()
+
+        if resposta == QMessageBox.Yes:
+            db = DataBase()
+            retorno = db.excluir_nota(self.txt_id.text())
+
+            if retorno == 'Ok':
+                nv_msg = QMessageBox()
+                nv_msg.setWindowTitle('Remover Nota')
+                nv_msg.setText('Nota Removida com Sucesso!')
+                nv_msg.exec()
+                # self.limpar_campos()
+            else:
+                nv_msg = QMessageBox()
+                nv_msg.setWindowTitle('Remover Nota')
+                nv_msg.setText(f'Erro ao Remover Nota. {retorno}')
+                nv_msg.exec()
+        self.popular_tabela_notas_cadastradas()
+        self.txt_nome_nota.setReadOnly(False)
+
+    def limpar_campos(self):
+        for widget in self.container.children():
+            if isinstance(widget, QLineEdit):
+                widget.clear()
+            elif isinstance(widget, QComboBox):
+                widget.setCurrentIndex(0)
+        self.btn_remover.setVisible(False)
+        self.btn_salvar.setText('Salvar')
+        self.txt_cpf.setReadOnly(False)
+
+    def popular_tabela_notas_cadastradas(self):
+        self.tabela_notas_cadastradas.setRowCount(0)
+        db = DataBase()
+        lista_notas = db.consulta_todas_notas()
+        self.tabela_notas_cadastradas.setRowCount(len(lista_notas))
+
+        for linha, nota in enumerate(lista_notas):
+            for coluna, valor in enumerate(nota):
+                self.tabela_notas_cadastradas.setItem(linha, coluna, QTableWidgetItem(str(valor)))
+
+    def carregar_dados(self, row, column):
+        self.txt_id.setText(self.tabela_notas_cadastradas.item(row, 0).text())
+        self.txt_nome_nota.setText(self.tabela_notas_cadastradas.item(row, 1).text())
+        self.txt_data_nota.setText(self.tabela_notas_cadastradas.item(row, 2).text())
+        self.txt_nota.setText(self.tabela_notas_cadastradas.item(row, 3).text())
+        self.btn_salvar.setText('Atualizar')
+        self.btn_remover.setVisible(True)
+        self.txt_id.setReadOnly(True)

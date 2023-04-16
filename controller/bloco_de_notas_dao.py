@@ -1,10 +1,11 @@
 import sqlite3
+from datetime import datetime
 
 from model.bloco_de_notas import Bloco_De_Notas
 
 
 class DataBase:
-    def __init__(self, nome='system.db2'):
+    def __init__(self, nome='notas.db'):
         self.connection = None
         self.name = nome
 
@@ -23,7 +24,7 @@ class DataBase:
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS BLOCO_DE_NOTAS(
-            ID INTEGER SERIAL PRIMARY KEY,
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
             NOME_NOTA TEXT,
             DATA_NOTA TEXT,
             TEXTO_NOTA TEXT
@@ -48,17 +49,25 @@ class DataBase:
         finally:
             self.close_connection()
 
-    def ler_nota(self):
-        pass
+    def ler_nota(self, id):
+        self.connect()
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(f"""SELECT * FROM BLOCO_DE_NOTAS WHERE ID = {int(id)} """)
+            return cursor.fetchone()
+        except sqlite3.Error as e:
+            return None
+        finally:
+            self.close_connection()
 
     def editar_nota(self, nota = Bloco_De_Notas):
         self.connect()
         try:
             cursor = self.connection.cursor()
-            cursor.execute(f""" UPDATE BANCO_DE_NOTAS SET
+            cursor.execute(f""" UPDATE BLOCO_DE_NOTAS SET
                  ID = '{nota.id}',
                  NOME_NOTA = '{nota.nome_nota}',
-                 DATA_NOTA = '{nota.data_nota}'
+                 DATA_NOTA = '{nota.data_nota}',
                  TEXTO_NOTA = '{nota.texto_nota}'""")
             self.connection.commit()
             return 'Ok'
@@ -67,5 +76,26 @@ class DataBase:
         finally:
             self.close_connection()
 
-    def excluir_nota(self):
-        pass
+    def excluir_nota(self, id):
+        self.connect()
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(f""" DELETE FROM BLOCO_DE_NOTAS WHERE ID = {int(id)} """)
+            self.connection.commit()
+            return 'Ok'
+        except sqlite3.Error as e:
+            print(e)
+        finally:
+            self.close_connection()
+
+    def consulta_todas_notas(self):
+        self.connect()
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(f"""SELECT * FROM BLOCO_DE_NOTAS""")
+            clientes = cursor.fetchall()
+            return clientes
+        except sqlite3.Error as e:
+            return None
+        finally:
+            self.close_connection()
