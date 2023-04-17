@@ -1,6 +1,8 @@
 import sqlite3
 from datetime import datetime
 
+from PySide6.QtWidgets import QMessageBox
+
 from model.bloco_de_notas import Bloco_De_Notas
 
 

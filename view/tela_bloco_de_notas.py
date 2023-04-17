@@ -15,7 +15,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setMinimumSize(450, 450)
+        self.setMinimumSize(458, 450)
 
         self.setWindowTitle('BLOCO DE NOTAS')
 
@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
                 msg.setWindowTitle('Erro ao Criar Nota!')
-                msg.setText(f'O ID {self.txt_id.text()} já existe com o nome {self.txt_nome_nota}')
+                msg.setText(f'O ID {self.txt_id.text()} já existe com o nome {self.txt_nome_nota.text()}')
                 msg.exec()
             else:
                 msg = QMessageBox()
@@ -122,8 +122,8 @@ class MainWindow(QMainWindow):
             if retorno is not None:
                 self.btn_salvar.setText('Atualizar')
                 msg = QMessageBox()
-                msg.setWindowTitle('Cliente já cadastrado')
-                msg.setText(f'O CPF {self.txt_id.text()} já esta cadastrado')
+                msg.setWindowTitle('Nota já Salva.')
+                msg.setText(f'A Nota {self.txt_id.text()} já esta Salva')
                 msg.exec()
                 self.txt_nome_nota.setText(retorno[1])
                 self.txt_nota.setText(retorno[2])
