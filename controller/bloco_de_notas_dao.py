@@ -64,10 +64,10 @@ class DataBase:
         try:
             cursor = self.connection.cursor()
             cursor.execute(f""" UPDATE BLOCO_DE_NOTAS SET
-                 ID = '{nota.id}',
                  NOME_NOTA = '{nota.nome_nota}',
                  DATA_NOTA = '{nota.data_nota}',
-                 TEXTO_NOTA = '{nota.texto_nota}' """)
+                 TEXTO_NOTA = '{nota.texto_nota}' 
+                 WHERE ID = {nota.id} """)
             self.connection.commit()
             return 'Ok'
         except sqlite3.Error as e:
