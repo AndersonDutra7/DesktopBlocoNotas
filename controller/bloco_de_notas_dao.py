@@ -1,7 +1,4 @@
 import sqlite3
-from datetime import datetime
-
-from PySide6.QtWidgets import QMessageBox
 
 from model.bloco_de_notas import Bloco_De_Notas
 
@@ -55,7 +52,7 @@ class DataBase:
         self.connect()
         try:
             cursor = self.connection.cursor()
-            cursor.execute(f"""SELECT * FROM BLOCO_DE_NOTAS WHERE ID = {int(id)} """)
+            cursor.execute(f"""SELECT * FROM BLOCO_DE_NOTAS WHERE ID = '{int(id)}' """)
             return cursor.fetchone()
         except sqlite3.Error as e:
             return None
@@ -70,7 +67,7 @@ class DataBase:
                  ID = '{nota.id}',
                  NOME_NOTA = '{nota.nome_nota}',
                  DATA_NOTA = '{nota.data_nota}',
-                 TEXTO_NOTA = '{nota.texto_nota}'""")
+                 TEXTO_NOTA = '{nota.texto_nota}' """)
             self.connection.commit()
             return 'Ok'
         except sqlite3.Error as e:
@@ -82,7 +79,7 @@ class DataBase:
         self.connect()
         try:
             cursor = self.connection.cursor()
-            cursor.execute(f""" DELETE FROM BLOCO_DE_NOTAS WHERE ID = {int(id)} """)
+            cursor.execute(f""" DELETE FROM BLOCO_DE_NOTAS WHERE ID = '{id}' """)
             self.connection.commit()
             return 'Ok'
         except sqlite3.Error as e:
