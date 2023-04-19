@@ -5,7 +5,7 @@ from datetime import datetime
 
 from PySide6 import QtWidgets
 from PySide6.QtCore import QSize
-from PySide6.QtWidgets import (QMainWindow, QVBoxLayout, QComboBox, QLabel, QLineEdit, QWidget, QPushButton,
+from PySide6.QtWidgets import (QMainWindow, QVBoxLayout, QLabel, QLineEdit, QWidget, QPushButton,
                                QMessageBox, QSizePolicy, QTableWidget, QAbstractItemView, QTableWidgetItem, QTextEdit)
 
 from model.bloco_de_notas import Bloco_De_Notas
@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
         self.lbl_id = QLabel('ID')
         self.txt_id = QLineEdit()
         self.txt_id.setMaximumSize(QSize(100, 100))
+        self.txt_id.setReadOnly(True)
         self.lbl_nome_nota = QLabel('TITULO DA NOTA')
         self.txt_nome_nota = QLineEdit()
         self.lbl_nota = QLabel('NOTA')
@@ -62,7 +63,6 @@ class MainWindow(QMainWindow):
         self.container.setLayout(layout)
 
         self.btn_salvar.clicked.connect(self.salvar_nota)
-        self.txt_id.editingFinished.connect(self.consultar_nota())
         self.btn_remover.clicked.connect(self.remover_nota)
         self.btn_limpar.clicked.connect(self.limpar_campos)
         self.tabela_notas_cadastradas.cellDoubleClicked.connect(self.carregar_dados)
@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
     def consultar_nota(self):
         if self.txt_id.text() != '':
             db = DataBase()
-            retorno = db.consulta_todas_notas(str(self.txt_id.text()))
+            retorno = db.consulta_todas_notas(self.txt_id.text())
 
             if retorno is not None:
                 self.btn_salvar.setText('Atualizar')

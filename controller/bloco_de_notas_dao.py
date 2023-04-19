@@ -34,9 +34,9 @@ class DataBase:
     def criar_nota(self, bloco = Bloco_De_Notas):
         self.connect()
         cursor = self.connection.cursor()
-        campos_bloco = ('ID', 'NOME_NOTA', 'DATA_NOTA', 'TEXTO_NOTA')
+        campos_bloco = ('NOME_NOTA', 'DATA_NOTA', 'TEXTO_NOTA')
 
-        valores_bloco = f" '{bloco.id}', '{bloco.nome_nota}', '{bloco.data_nota}', " \
+        valores_bloco = f" '{bloco.nome_nota}', '{bloco.data_nota}', " \
                   f" '{bloco.texto_nota}' "
 
         try:
