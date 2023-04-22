@@ -23,10 +23,12 @@ class MainWindow(QMainWindow):
         self.txt_id = QLineEdit()
         self.txt_id.setMaximumSize(QSize(100, 100))
         self.txt_id.setReadOnly(True)
+        self.txt_id.setStyleSheet("background-color: silver;")
         self.lbl_nome_nota = QLabel('TITULO DA NOTA')
         self.txt_nome_nota = QLineEdit()
         self.lbl_nota = QLabel('NOTA')
         self.txt_nota = QTextEdit()
+        self.txt_nota.setStyleSheet("background-color: white;")
         self.lbl_notas_cadastradas = QLabel('NOTAS CADASTRADAS')
         self.btn_salvar = QPushButton('Salvar')
         self.btn_salvar.setMaximumSize(QSize(100, 100))
@@ -81,13 +83,12 @@ class MainWindow(QMainWindow):
         if self.btn_salvar.text() == 'Salvar':
             retorno = db.criar_nota(nota)
             self.btn_limpar.setVisible(True)
-
             if retorno == 'Ok':
-                msg = QMessageBox()
-                msg.setWindowTitle('Criação de Nota.')
-                msg.setText('Nota salva com sucesso!')
-                msg.exec()
-                self.limpar_campos()
+                if (self.txt_nome_nota.text() == '') or (self.txt_nota.text() == ''):
+                    msg = QMessageBox()
+                    msg.setWindowTitle('Criação de Nota.')
+                    msg.setText('Nota salva com sucesso!')
+                    msg.exec()
             elif retorno == 'UNIQUE constraint failed: BLOCO_DE_NOTAS.ID':
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
@@ -108,7 +109,6 @@ class MainWindow(QMainWindow):
                 msg.setWindowTitle('Edição de Nota')
                 msg.setText('Nota atualizada.')
                 msg.exec()
-                self.limpar_campos()
             else:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
@@ -116,7 +116,8 @@ class MainWindow(QMainWindow):
                 msg.setText('Alguma coisa não esta certa!\nPor favor, tente novamente!')
                 msg.exec()
         self.popular_tabela_notas_cadastradas()
-        self.btn_limpar.setVisible(True)
+        self.btn_limpar.setVisible(False)
+        self.limpar_campos()
 
     def consultar_nota(self):
         if self.txt_id.text() != '':
@@ -135,10 +136,11 @@ class MainWindow(QMainWindow):
                 self.btn_remover.setVisible(True)
 
     def remover_nota(self):
+        db = DataBase()
         msg = QMessageBox()
         msg.setWindowTitle('Remover Nota')
-        msg.setText('Esta nota será removida!')
-        msg.setInformativeText(f'Voce deseja remover a nota de nome: {self.txt_nome_nota.text()} ?')
+        msg.setText('Confirma a exclusão abaixo?!')
+        msg.setInformativeText(f'\nNOTA: {self.txt_id.text()} \nNOME: {self.txt_nome_nota.text()} ?')
         msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         msg.button(QMessageBox.Yes).setText('Sim')
         msg.button(QMessageBox.No).setText('Não')
@@ -146,9 +148,7 @@ class MainWindow(QMainWindow):
         resposta = msg.exec()
 
         if resposta == QMessageBox.Yes:
-            db = DataBase()
             retorno = db.excluir_nota(self.txt_id.text())
-
             if retorno == 'Ok':
                 nv_msg = QMessageBox()
                 nv_msg.setWindowTitle('Remover Nota')
@@ -158,10 +158,13 @@ class MainWindow(QMainWindow):
             else:
                 nv_msg = QMessageBox()
                 nv_msg.setWindowTitle('Remover Nota')
-                nv_msg.setText(f'Erro ao remover nota. {retorno}')
+                nv_msg.setText(f'Erro ao remover nota.')
                 nv_msg.exec()
+        elif resposta == QMessageBox.No:
+            self.limpar_campos()
         self.popular_tabela_notas_cadastradas()
         self.txt_nome_nota.setReadOnly(False)
+        self.btn_limpar.setVisible(False)
 
     def limpar_campos(self):
         for widget in self.container.children():
@@ -169,9 +172,10 @@ class MainWindow(QMainWindow):
                 widget.clear()
             elif isinstance(widget, QTextEdit):
                 widget.clear()
-        self.btn_remover.setVisible(False)
         self.btn_salvar.setText('Salvar')
-        self.txt_id.setReadOnly(False)
+        self.txt_id.setStyleSheet("background-color: silver;")
+        self.btn_remover.setVisible(False)
+        self.btn_limpar.setVisible(False)
 
     def popular_tabela_notas_cadastradas(self):
         self.tabela_notas_cadastradas.setRowCount(0)
@@ -184,6 +188,7 @@ class MainWindow(QMainWindow):
                 self.tabela_notas_cadastradas.setItem(linha, coluna, QTableWidgetItem(str(valor)))
 
     def carregar_dados(self, row, column):
+        self.txt_id.setStyleSheet("background-color: white;")
         self.txt_id.setText(self.tabela_notas_cadastradas.item(row, 0).text())
         self.txt_nome_nota.setText(self.tabela_notas_cadastradas.item(row, 1).text())
         self.txt_data_nota.setText(self.tabela_notas_cadastradas.item(row, 2).text())
