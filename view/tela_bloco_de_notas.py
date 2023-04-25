@@ -81,25 +81,25 @@ class MainWindow(QMainWindow):
         )
 
         if self.btn_salvar.text() == 'Salvar':
-            retorno = db.criar_nota(nota)
-            self.btn_limpar.setVisible(True)
-            if retorno == 'Ok':
-                if (self.txt_nome_nota.text() == '') or (self.txt_nota.text() == ''):
+            if (self.txt_nome_nota.text().split()) and (self.txt_nota.toPlainText().split()):
+                retorno = db.criar_nota(nota)
+                self.btn_limpar.setVisible(True)
+                if retorno == 'Ok':
                     msg = QMessageBox()
                     msg.setWindowTitle('Criação de Nota.')
                     msg.setText('Nota salva com sucesso!')
                     msg.exec()
-            elif retorno == 'UNIQUE constraint failed: BLOCO_DE_NOTAS.ID':
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle('Erro ao Criar Nota!')
-                msg.setText(f'O ID {self.txt_id.text()} já existe com o nome {self.txt_nome_nota.text()}')
-                msg.exec()
+                elif retorno == 'UNIQUE constraint failed: BLOCO_DE_NOTAS.ID':
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Critical)
+                    msg.setWindowTitle('Erro ao Criar Nota!')
+                    msg.setText(f'O ID {self.txt_id.text()} já existe com o nome {self.txt_nome_nota.text()}')
+                    msg.exec()
             else:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
                 msg.setWindowTitle('Erro ao Criar Nota!')
-                msg.setText('Verifique os dados inseridos ...')
+                msg.setText('Os campos devem ser preenchidos ...')
                 msg.exec()
         elif self.btn_salvar.text() == 'Atualizar':
             retorno = db.editar_nota(nota)
